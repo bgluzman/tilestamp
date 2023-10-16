@@ -28,7 +28,44 @@ bool App::operator()(ImGuiIO &io, SDL_Window &window) {
       done = true;
   }
 
-  ImGui::Begin("Hello, world!");
+  if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      ImGui::MenuItem("(demo menu)", NULL, false, false);
+      if (ImGui::MenuItem("Checked", NULL, true)) {
+      }
+      ImGui::Separator();
+      if (ImGui::MenuItem("Quit", "Alt+F4")) {
+      }
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Edit")) {
+      if (ImGui::MenuItem("Undo", "CTRL+Z")) {
+      }
+      if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
+      } // Disabled item
+      ImGui::Separator();
+      if (ImGui::MenuItem("Cut", "CTRL+X")) {
+      }
+      if (ImGui::MenuItem("Copy", "CTRL+C")) {
+      }
+      if (ImGui::MenuItem("Paste", "CTRL+V")) {
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
+
+  // We demonstrate using the full viewport area or the work area (without
+  // menu-bars, task-bars etc.) Based on your use case you may want one or the
+  // other.
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+
+  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
+                                  ImGuiWindowFlags_NoMove |
+                                  ImGuiWindowFlags_NoSavedSettings;
+  ImGui::Begin("Hello, world!", nullptr, flags);
 
   ImGui::Text("Text goes here.");
 
