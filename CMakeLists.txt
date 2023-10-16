@@ -52,3 +52,6 @@ target_link_libraries(imgui PUBLIC SDL2::SDL2-static)
 
 add_executable(tilestamp src/main.cpp)
 target_link_libraries(tilestamp PRIVATE imgui)
+
+add_executable(demo src/demo.cpp)
+target_link_libraries(demo PRIVATE imgui)
