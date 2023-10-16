@@ -50,7 +50,12 @@ add_library(
 target_include_directories(imgui PUBLIC "${imgui_SOURCE_DIR}" "${imgui_SOURCE_DIR}/backends")
 target_link_libraries(imgui PUBLIC SDL2::SDL2-static)
 
-add_executable(tilestamp src/main.cpp)
+add_executable(
+        tilestamp
+        src/main.cpp
+        src/App.cpp
+        src/App.h
+)
 target_link_libraries(tilestamp PRIVATE imgui)
 
 add_executable(demo src/demo.cpp)
