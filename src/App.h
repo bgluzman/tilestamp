@@ -11,6 +11,11 @@ public:
   bool operator()(ImGuiIO &io, SDL_Window &window);
 
 private:
+  void MenuBar();
+  void AttributesFrame(ImGuiIO &io);
+  void TilemapFrame();
+  void OutputFrame();
+
   int counter_ = 0;
 };
 

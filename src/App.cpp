@@ -28,6 +28,55 @@ bool App::operator()(ImGuiIO &io, SDL_Window &window) {
       done = true;
   }
 
+  MenuBar();
+
+  // We demonstrate using the full viewport area or the work area (without
+  // menu-bars, task-bars etc.) Based on your use case you may want one or the
+  // other.
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+
+  // Lay out UI using approach from here:
+  // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
+  static float w = 200.0f;
+  static float h = 300.0f;
+  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
+                                  ImGuiWindowFlags_NoMove |
+                                  ImGuiWindowFlags_NoSavedSettings;
+
+  ImGui::Begin("tilestamp", nullptr, flags);
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+  ImGui::BeginChild("attributes", ImVec2(w, h), true);
+  AttributesFrame(io);
+  ImGui::EndChild();
+
+  ImGui::SameLine();
+  ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
+  if (ImGui::IsItemActive())
+    w += ImGui::GetIO().MouseDelta.x;
+  ImGui::SameLine();
+
+  ImGui::BeginChild("tilemap", ImVec2(0, h), true);
+  TilemapFrame();
+  ImGui::EndChild();
+
+  ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
+  if (ImGui::IsItemActive())
+    h += ImGui::GetIO().MouseDelta.y;
+
+  ImGui::BeginChild("output", ImVec2(0, 0), true);
+  OutputFrame();
+  ImGui::EndChild();
+
+  ImGui::PopStyleVar();
+  ImGui::End();
+
+  return done;
+}
+
+void App::MenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
       ImGui::MenuItem("(demo menu)", NULL, false, false);
@@ -54,26 +103,9 @@ bool App::operator()(ImGuiIO &io, SDL_Window &window) {
     }
     ImGui::EndMainMenuBar();
   }
+}
 
-  // We demonstrate using the full viewport area or the work area (without
-  // menu-bars, task-bars etc.) Based on your use case you may want one or the
-  // other.
-  const ImGuiViewport *viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->WorkPos);
-  ImGui::SetNextWindowSize(viewport->WorkSize);
-
-  // Lay out UI using approach from here:
-  // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
-  static float w = 200.0f;
-  static float h = 300.0f;
-  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
-                                  ImGuiWindowFlags_NoMove |
-                                  ImGuiWindowFlags_NoSavedSettings;
-
-  ImGui::Begin("Hello, world!", nullptr, flags);
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-
-  ImGui::BeginChild("child1", ImVec2(w, h), true);
+void App::AttributesFrame(ImGuiIO &io) {
   ImGui::Text("Text goes here.");
   if (ImGui::Button("Button"))
     counter_++;
@@ -82,28 +114,10 @@ bool App::operator()(ImGuiIO &io, SDL_Window &window) {
 
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
-  ImGui::EndChild();
-
-  ImGui::SameLine();
-  ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
-  if (ImGui::IsItemActive())
-    w += ImGui::GetIO().MouseDelta.x;
-  ImGui::SameLine();
-
-  ImGui::BeginChild("child2", ImVec2(0, h), true);
-  ImGui::EndChild();
-
-  ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-  if (ImGui::IsItemActive())
-    h += ImGui::GetIO().MouseDelta.y;
-
-  ImGui::BeginChild("child3", ImVec2(0, 0), true);
-  ImGui::EndChild();
-
-  ImGui::PopStyleVar();
-  ImGui::End();
-
-  return done;
 }
+
+void App::TilemapFrame() {}
+
+void App::OutputFrame() {}
 
 } // namespace ts
