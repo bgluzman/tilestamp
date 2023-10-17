@@ -14,19 +14,44 @@ FetchContent_Declare(
         BUILD_COMMAND ""
 )
 FetchContent_Declare(
+        SDL2_image
+        URL https://github.com/libsdl-org/SDL_image/releases/download/release-2.6.3/SDL2_image-devel-2.6.3-mingw.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+)
+FetchContent_Declare(
+        SDL2_ttf
+        URL https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.2/SDL2_ttf-devel-2.20.2-mingw.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+)
+FetchContent_Declare(
         imgui
         URL https://github.com/ocornut/imgui/archive/refs/tags/v1.89.9.zip
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
 )
-FetchContent_MakeAvailable(SDL2 imgui)
+FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf imgui)
 
 find_package(
         SDL2
         REQUIRED
         PATHS "${sdl2_SOURCE_DIR}/x86_64-w64-mingw32/lib/cmake/SDL2"
 )
+find_package(
+        SDL2_image
+        REQUIRED
+        PATHS "${sdl2_image_SOURCE_DIR}/x86_64-w64-mingw32/lib/cmake/SDL2_image"
+)
+find_package(
+        SDL2_ttf
+        REQUIRED
+        PATHS "${sdl2_ttf_SOURCE_DIR}/x86_64-w64-mingw32/lib/cmake/SDL2_ttf"
+)
+
 add_library(
         imgui
         OBJECT
@@ -56,7 +81,13 @@ add_executable(
         src/App.cpp
         src/App.h
 )
-target_link_libraries(tilestamp PRIVATE imgui)
+target_link_libraries(
+        tilestamp
+        PRIVATE
+        SDL2::SDL2-static
+        SDL2_image::SDL2_image-static
+        SDL2_ttf::SDL2_ttf-static
+        imgui)
 
 add_executable(demo src/demo.cpp)
 target_link_libraries(demo PRIVATE imgui)
