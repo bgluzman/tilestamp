@@ -6,14 +6,51 @@
 #include <imgui_impl_sdl2.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <iostream>
 #include <stdexcept>
 
 namespace ts {
 
 App::App(SDL_Renderer *renderer) {
-  image_ = IMG_LoadTexture(renderer, "");
-  if (!image_) {
+  // TODO (bgluzman): better logging/error reporting everywhere
+  SDL_Texture *base_image = IMG_LoadTexture(renderer, "");
+  if (!base_image) {
     throw std::runtime_error{"cannot load image"};
+  }
+
+  if (SDL_QueryTexture(base_image, nullptr, nullptr, &image_w_, &image_h_) <
+      0) {
+    throw std::runtime_error{"SDL_QueryTexture"};
+  }
+
+  image_ = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888,
+                             SDL_TEXTUREACCESS_TARGET, image_w_, image_h_);
+  if (!image_) {
+    throw std::runtime_error{"SDL_CreateTexture"};
+  }
+
+  SDL_Texture *prev_render_target = SDL_GetRenderTarget(renderer);
+
+  if (SDL_SetRenderTarget(renderer, image_) < 0) {
+    std::cerr << SDL_GetError() << std::endl;
+    throw std::runtime_error{"SDL_SetRenderTarget"};
+  }
+  SDL_Rect rect{.x = 0, .y = 0, .w = image_w_, .h = image_h_};
+  if (SDL_RenderCopy(renderer, base_image, &rect, &rect) < 0) {
+    throw std::runtime_error{"SDL_RenderCopy"};
+  }
+
+  if (SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE) < 0) {
+    throw std::runtime_error{"SDL_SetRenderDrawColor"};
+  }
+  SDL_Rect selection{.x = 0, .y = 0, .w = 16, .h = 16};
+  if (SDL_RenderDrawRect(renderer, &selection) < 0) {
+    throw std::runtime_error{"SDL_RenderDrawRect"};
+  }
+
+  if (SDL_SetRenderTarget(renderer, prev_render_target) < 0) {
+    std::cerr << SDL_GetError() << std::endl;
+    throw std::runtime_error{"SDL_SetRenderTarget"};
   }
 }
 
@@ -128,12 +165,7 @@ void App::Tilemap() {
 
   ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
   ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-  int my_tex_w = 0, my_tex_h = 0;
-  if (SDL_QueryTexture(image_, nullptr, nullptr, &my_tex_w, &my_tex_h) < 0) {
-    // TODO (bgluzman): handle this in or somewhere better?
-    throw std::runtime_error{"SDL_QueryTexture"};
-  }
-  ImGui::Image(image_, ImVec2(my_tex_w * scale, my_tex_h * scale), uv_min,
+  ImGui::Image(image_, ImVec2(image_w_ * scale, image_h_ * scale), uv_min,
                uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
                ImGui::GetStyleColorVec4(ImGuiCol_Border));
 

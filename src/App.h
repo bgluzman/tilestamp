@@ -27,6 +27,8 @@ private:
   std::vector<std::pair<std::string, std::string>> properties_ = {
       {"default", "default"}};
   SDL_Texture *image_ = nullptr;
+  int image_w_ = 0;
+  int image_h_ = 0;
 };
 
 } // namespace ts
