@@ -4,6 +4,10 @@
 #include <SDL.h>
 #include <imgui.h>
 
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace ts {
 
 class App {
@@ -20,7 +24,8 @@ private:
   void Tilemap();
   void Output();
 
-  int counter_ = 0;
+  std::vector<std::pair<std::string, std::string>> properties_ = {
+      {"default", "default"}};
   SDL_Texture *image_ = nullptr;
 };
 

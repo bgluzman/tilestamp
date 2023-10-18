@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 #include <stdexcept>
 
@@ -83,11 +84,32 @@ void App::MenuBar() {
 
 void App::Properties() {
   ImGui::Begin("Properties");
-  ImGui::Text("Text goes here.");
-  if (ImGui::Button("Button"))
-    counter_++;
-  ImGui::SameLine();
-  ImGui::Text("counter = %d", counter_);
+
+  if (ImGui::BeginTable("properties", 3)) {
+    ImGui::TableSetupColumn("Name");
+    ImGui::TableSetupColumn("Value");
+    ImGui::TableSetupColumn("");
+    ImGui::TableHeadersRow();
+
+    int row = 0;
+    for (auto &[name, value] : properties_) {
+      ImGui::TableNextRow();
+
+      ImGui::TableSetColumnIndex(0);
+      ImGui::InputText(("##name" + std::to_string(row)).c_str(), &name);
+      ImGui::TableSetColumnIndex(1);
+      ImGui::InputText(("##value" + std::to_string(row)).c_str(), &value);
+      ImGui::TableSetColumnIndex(2);
+      ImGui::Button(("-##" + std::to_string(row)).c_str());
+      ++row;
+    }
+
+    ImGui::EndTable();
+  }
+
+  if (ImGui::Button("+")) {
+    properties_.push_back({"name", "value"});
+  }
   ImGui::End();
 }
 

@@ -65,6 +65,8 @@ add_library(
         "${imgui_SOURCE_DIR}/imgui_internal.h"
         "${imgui_SOURCE_DIR}/imgui.h"
         "${imgui_SOURCE_DIR}/imconfig.h"
+        "${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp"
+        "${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.h"
         "${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp"
         "${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.h"
         "${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp"
