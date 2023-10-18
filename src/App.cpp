@@ -91,8 +91,10 @@ void App::Properties() {
     ImGui::TableSetupColumn("");
     ImGui::TableHeadersRow();
 
+    bool delete_row = false;
     int row = 0;
-    for (auto &[name, value] : properties_) {
+    for (; row != properties_.size(); ++row) {
+      auto &[name, value] = properties_[row];
       ImGui::TableNextRow();
 
       ImGui::TableSetColumnIndex(0);
@@ -100,9 +102,14 @@ void App::Properties() {
       ImGui::TableSetColumnIndex(1);
       ImGui::InputText(("##value" + std::to_string(row)).c_str(), &value);
       ImGui::TableSetColumnIndex(2);
-      ImGui::Button(("-##" + std::to_string(row)).c_str());
-      ++row;
+      if (ImGui::Button(("-##" + std::to_string(row)).c_str())) {
+        delete_row = true;
+        break;
+      }
     }
+
+    if (delete_row)
+      properties_.erase(properties_.begin() + row);
 
     ImGui::EndTable();
   }
