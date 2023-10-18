@@ -59,7 +59,7 @@ int main(int, char **)
 
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-  ts::App app;
+  ts::App app(renderer);
   bool done = false;
   while (!done) {
     // Start the Dear ImGui frame

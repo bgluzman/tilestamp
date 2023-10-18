@@ -1,10 +1,26 @@
 #include "App.h"
 
 #include <SDL.h>
+#include <SDL_image.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 
+#include <stdexcept>
+
 namespace ts {
+
+App::App(SDL_Renderer *renderer) {
+  image_ = IMG_LoadTexture(renderer, "");
+  if (!image_) {
+    throw std::runtime_error{"cannot load image"};
+  }
+}
+
+App::~App() noexcept {
+  if (image_) {
+    SDL_DestroyTexture(image_);
+  }
+}
 
 bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   // Poll and handle events (inputs, window resize, etc.)
@@ -77,7 +93,17 @@ void App::Properties() {
 
 void App::Tilemap() {
   ImGui::Begin("Tilemap");
-  ImGui::Text("placeholder");
+  ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
+  ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
+
+  int my_tex_w = 0, my_tex_h = 0;
+  if (SDL_QueryTexture(image_, nullptr, nullptr, &my_tex_w, &my_tex_h) < 0) {
+    throw std::runtime_error{"SDL_QueryTexture"};
+  }
+
+  ImGui::Image(image_, ImVec2(my_tex_w * 2, my_tex_h * 2), uv_min, uv_max,
+               ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+               ImGui::GetStyleColorVec4(ImGuiCol_Border));
   ImGui::End();
 }
 

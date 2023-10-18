@@ -8,6 +8,10 @@ namespace ts {
 
 class App {
 public:
+  // TODO (bgluzman): copy/move ctor/assignment
+  App(SDL_Renderer *renderer);
+  ~App() noexcept;
+
   bool operator()(ImGuiIO &io, SDL_Window &window);
 
 private:
@@ -17,6 +21,7 @@ private:
   void Output();
 
   int counter_ = 0;
+  SDL_Texture *image_ = nullptr;
 };
 
 } // namespace ts
