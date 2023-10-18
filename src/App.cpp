@@ -6,7 +6,7 @@
 
 namespace ts {
 
-bool App::operator()(ImGuiIO &io, SDL_Window &window) {
+bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   // Poll and handle events (inputs, window resize, etc.)
   // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
   // tell if dear imgui wants to use your inputs.
@@ -29,49 +29,9 @@ bool App::operator()(ImGuiIO &io, SDL_Window &window) {
   }
 
   MenuBar();
-
-  // We demonstrate using the full viewport area or the work area (without
-  // menu-bars, task-bars etc.) Based on your use case you may want one or the
-  // other.
-  const ImGuiViewport *viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->WorkPos);
-  ImGui::SetNextWindowSize(viewport->WorkSize);
-
-  // Lay out UI using approach from here:
-  // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
-  static float w = 200.0f;
-  static float h = 300.0f;
-  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
-                                  ImGuiWindowFlags_NoMove |
-                                  ImGuiWindowFlags_NoSavedSettings;
-
-  ImGui::Begin("tilestamp", nullptr, flags);
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-
-  ImGui::BeginChild("attributes", ImVec2(w, h), true);
-  AttributesFrame(io);
-  ImGui::EndChild();
-
-  ImGui::SameLine();
-  ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
-  if (ImGui::IsItemActive())
-    w += ImGui::GetIO().MouseDelta.x;
-  ImGui::SameLine();
-
-  ImGui::BeginChild("tilemap", ImVec2(0, h), true);
-  TilemapFrame();
-  ImGui::EndChild();
-
-  ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-  if (ImGui::IsItemActive())
-    h += ImGui::GetIO().MouseDelta.y;
-
-  ImGui::BeginChild("output", ImVec2(0, 0), true);
-  OutputFrame();
-  ImGui::EndChild();
-
-  ImGui::PopStyleVar();
-  ImGui::End();
+  Tilemap();
+  Properties();
+  Output();
 
   return done;
 }
@@ -105,19 +65,36 @@ void App::MenuBar() {
   }
 }
 
-void App::AttributesFrame(ImGuiIO &io) {
+void App::Properties() {
+  ImGui::Begin("Properties");
   ImGui::Text("Text goes here.");
   if (ImGui::Button("Button"))
     counter_++;
   ImGui::SameLine();
   ImGui::Text("counter = %d", counter_);
-
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / io.Framerate, io.Framerate);
+  ImGui::End();
 }
 
-void App::TilemapFrame() {}
+void App::Tilemap() {
+  ImGui::Begin("Tilemap");
+  ImGui::Text("placeholder");
+  ImGui::End();
+}
 
-void App::OutputFrame() {}
+void App::Output() {
+  ImGui::Begin("Output");
+  ImGui::TextWrapped(
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed volutpat "
+      "eros diam, auctor tristique dui tempor et. Suspendisse potenti. Nam "
+      "porta at erat et consectetur. Cras in molestie enim. In sodales euismod "
+      "leo quis malesuada. Phasellus gravida eget nunc a imperdiet. Curabitur "
+      "convallis elementum ex, quis scelerisque neque tincidunt sit amet. Cras "
+      "ultricies libero sed tempor pulvinar. Proin at mauris dignissim velit "
+      "vestibulum efficitur at at enim. Duis ac dui eget lorem molestie "
+      "vehicula id hendrerit nibh. Suspendisse elementum sapien sed leo "
+      "vulputate semper. Quisque interdum luctus mauris vel tempus. Sed "
+      "imperdiet eros sit amet sem congue, non molestie neque euismod.");
+  ImGui::End();
+}
 
 } // namespace ts

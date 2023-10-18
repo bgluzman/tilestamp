@@ -12,9 +12,9 @@ public:
 
 private:
   void MenuBar();
-  void AttributesFrame(ImGuiIO &io);
-  void TilemapFrame();
-  void OutputFrame();
+  void Properties();
+  void Tilemap();
+  void Output();
 
   int counter_ = 0;
 };
