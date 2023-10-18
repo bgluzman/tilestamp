@@ -92,18 +92,22 @@ void App::Properties() {
 }
 
 void App::Tilemap() {
-  ImGui::Begin("Tilemap");
+  ImGui::Begin("Tilemap", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+
+  static float scale = 1.0;
+  ImGui::DragFloat("zoom", &scale, 0.01f);
+
   ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
   ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-
   int my_tex_w = 0, my_tex_h = 0;
   if (SDL_QueryTexture(image_, nullptr, nullptr, &my_tex_w, &my_tex_h) < 0) {
+    // TODO (bgluzman): handle this in or somewhere better?
     throw std::runtime_error{"SDL_QueryTexture"};
   }
-
-  ImGui::Image(image_, ImVec2(my_tex_w * 2, my_tex_h * 2), uv_min, uv_max,
-               ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+  ImGui::Image(image_, ImVec2(my_tex_w * scale, my_tex_h * scale), uv_min,
+               uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
                ImGui::GetStyleColorVec4(ImGuiCol_Border));
+
   ImGui::End();
 }
 
