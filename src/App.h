@@ -22,6 +22,7 @@ public:
 private:
   void MenuBar();
   void Properties();
+  void Template();
   void Tilemap();
   void Output();
 
@@ -32,7 +33,7 @@ private:
 
   std::vector<std::pair<std::string, std::string>> properties_ = {
       {"default", "default"}};
-  
+
   int image_w_ = 0;
   int image_h_ = 0;
 };

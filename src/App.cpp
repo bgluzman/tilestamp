@@ -50,6 +50,7 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   MenuBar();
   Tilemap();
   Properties();
+  Template();
   Output();
 
   return done;
@@ -85,7 +86,7 @@ void App::MenuBar() {
 }
 
 void App::Properties() {
-  ImGui::Begin("Properties");
+  ImGui::Begin("Property Editor");
 
   if (ImGui::BeginTable("properties", 3)) {
     ImGui::TableSetupColumn("Name");
@@ -119,6 +120,32 @@ void App::Properties() {
   if (ImGui::Button("+")) {
     properties_.push_back({"name", "value"});
   }
+  ImGui::End();
+}
+
+void App::Template() {
+  ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiCond_FirstUseEver);
+  ImGui::Begin("Template Editor");
+
+  // Fields
+  ImGui::BeginChild("template-fields", ImVec2(150, 0), true);
+  static int selected = 0;
+  if (ImGui::Selectable("field1", selected == 1))
+    selected = 1;
+  if (ImGui::Selectable("field2", selected == 2))
+    selected = 2;
+  ImGui::EndChild();
+
+  ImGui::SameLine();
+
+  // Attributes
+  ImGui::BeginChild("template-attrs",
+                    ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+  bool checked = false;
+  ImGui::Text("foo");
+  ImGui::Checkbox("bar", &checked);
+  ImGui::EndChild();
+
   ImGui::End();
 }
 
