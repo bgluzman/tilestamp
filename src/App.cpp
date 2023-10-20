@@ -11,50 +11,7 @@
 
 namespace ts {
 
-App::App(SDL_Renderer *renderer) {
-  // TODO (bgluzman): better logging/error reporting everywhere
-  SDL_Texture *base_image = IMG_LoadTexture(renderer, "");
-  if (!base_image) {
-    // TODO (bgluzman): obviously change this later...
-    // throw std::runtime_error{"cannot load image"};
-    return;
-  }
-
-  if (SDL_QueryTexture(base_image, nullptr, nullptr, &image_w_, &image_h_) <
-      0) {
-    throw std::runtime_error{"SDL_QueryTexture"};
-  }
-
-  image_ = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ABGR8888,
-                             SDL_TEXTUREACCESS_TARGET, image_w_, image_h_);
-  if (!image_) {
-    throw std::runtime_error{"SDL_CreateTexture"};
-  }
-
-  SDL_Texture *prev_render_target = SDL_GetRenderTarget(renderer);
-
-  if (SDL_SetRenderTarget(renderer, image_) < 0) {
-    std::cerr << SDL_GetError() << std::endl;
-    throw std::runtime_error{"SDL_SetRenderTarget"};
-  }
-  SDL_Rect rect{.x = 0, .y = 0, .w = image_w_, .h = image_h_};
-  if (SDL_RenderCopy(renderer, base_image, &rect, &rect) < 0) {
-    throw std::runtime_error{"SDL_RenderCopy"};
-  }
-
-  if (SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE) < 0) {
-    throw std::runtime_error{"SDL_SetRenderDrawColor"};
-  }
-  SDL_Rect selection{.x = 0, .y = 0, .w = 16, .h = 16};
-  if (SDL_RenderDrawRect(renderer, &selection) < 0) {
-    throw std::runtime_error{"SDL_RenderDrawRect"};
-  }
-
-  if (SDL_SetRenderTarget(renderer, prev_render_target) < 0) {
-    std::cerr << SDL_GetError() << std::endl;
-    throw std::runtime_error{"SDL_SetRenderTarget"};
-  }
-}
+App::App(SDL_Renderer *renderer) : renderer_(renderer) {}
 
 App::~App() noexcept {
   if (image_) {
@@ -82,6 +39,12 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
         event.window.event == SDL_WINDOWEVENT_CLOSE &&
         event.window.windowID == SDL_GetWindowID(&window))
       done = true;
+
+    if (event.type == SDL_DROPFILE) {
+      char *path = event.drop.file;
+      LoadImage(path);
+      SDL_free(path);
+    }
   }
 
   MenuBar();
@@ -191,6 +154,50 @@ void App::Output() {
       "vulputate semper. Quisque interdum luctus mauris vel tempus. Sed "
       "imperdiet eros sit amet sem congue, non molestie neque euismod.");
   ImGui::End();
+}
+
+void App::LoadImage(const std::filesystem::path &path) {
+  SDL_Texture *base_image = IMG_LoadTexture(renderer_, path.c_str());
+  if (!base_image) {
+    // TODO (bgluzman): obviously change this later...
+    // throw std::runtime_error{"cannot load image"};
+    return;
+  }
+
+  if (SDL_QueryTexture(base_image, nullptr, nullptr, &image_w_, &image_h_) <
+      0) {
+    throw std::runtime_error{"SDL_QueryTexture"};
+  }
+
+  image_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ABGR8888,
+                             SDL_TEXTUREACCESS_TARGET, image_w_, image_h_);
+  if (!image_) {
+    throw std::runtime_error{"SDL_CreateTexture"};
+  }
+
+  SDL_Texture *prev_render_target = SDL_GetRenderTarget(renderer_);
+
+  if (SDL_SetRenderTarget(renderer_, image_) < 0) {
+    std::cerr << SDL_GetError() << std::endl;
+    throw std::runtime_error{"SDL_SetRenderTarget"};
+  }
+  SDL_Rect rect{.x = 0, .y = 0, .w = image_w_, .h = image_h_};
+  if (SDL_RenderCopy(renderer_, base_image, &rect, &rect) < 0) {
+    throw std::runtime_error{"SDL_RenderCopy"};
+  }
+
+  if (SDL_SetRenderDrawColor(renderer_, 0, 255, 0, SDL_ALPHA_OPAQUE) < 0) {
+    throw std::runtime_error{"SDL_SetRenderDrawColor"};
+  }
+  SDL_Rect selection{.x = 0, .y = 0, .w = 16, .h = 16};
+  if (SDL_RenderDrawRect(renderer_, &selection) < 0) {
+    throw std::runtime_error{"SDL_RenderDrawRect"};
+  }
+
+  if (SDL_SetRenderTarget(renderer_, prev_render_target) < 0) {
+    std::cerr << SDL_GetError() << std::endl;
+    throw std::runtime_error{"SDL_SetRenderTarget"};
+  }
 }
 
 } // namespace ts
