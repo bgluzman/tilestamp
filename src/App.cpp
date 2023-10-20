@@ -58,8 +58,8 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
 void App::MenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
-      ImGui::MenuItem("(demo menu)", NULL, false, false);
-      if (ImGui::MenuItem("Checked", NULL, true)) {
+      ImGui::MenuItem("(demo menu)", nullptr, false, false);
+      if (ImGui::MenuItem("Checked", nullptr, true)) {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Quit", "Alt+F4")) {
@@ -130,8 +130,10 @@ void App::Tilemap() {
     ImGui::DragFloat("zoom", &scale, 0.01f);
     ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
     ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-    ImGui::Image(image_, ImVec2(image_w_ * scale, image_h_ * scale), uv_min,
-                 uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+    ImGui::Image(image_,
+                 ImVec2(static_cast<float>(image_w_) * scale,
+                        static_cast<float>(image_h_) * scale),
+                 uv_min, uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
                  ImGui::GetStyleColorVec4(ImGuiCol_Border));
   } else {
     ImGui::Text("no image selected");
