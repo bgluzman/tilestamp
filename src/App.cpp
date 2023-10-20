@@ -15,7 +15,9 @@ App::App(SDL_Renderer *renderer) {
   // TODO (bgluzman): better logging/error reporting everywhere
   SDL_Texture *base_image = IMG_LoadTexture(renderer, "");
   if (!base_image) {
-    throw std::runtime_error{"cannot load image"};
+    // TODO (bgluzman): obviously change this later...
+    // throw std::runtime_error{"cannot load image"};
+    return;
   }
 
   if (SDL_QueryTexture(base_image, nullptr, nullptr, &image_w_, &image_h_) <
@@ -160,14 +162,17 @@ void App::Properties() {
 void App::Tilemap() {
   ImGui::Begin("Tilemap", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 
-  static float scale = 1.0;
-  ImGui::DragFloat("zoom", &scale, 0.01f);
-
-  ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
-  ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-  ImGui::Image(image_, ImVec2(image_w_ * scale, image_h_ * scale), uv_min,
-               uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-               ImGui::GetStyleColorVec4(ImGuiCol_Border));
+  if (image_) {
+    static float scale = 1.0;
+    ImGui::DragFloat("zoom", &scale, 0.01f);
+    ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
+    ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
+    ImGui::Image(image_, ImVec2(image_w_ * scale, image_h_ * scale), uv_min,
+                 uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+                 ImGui::GetStyleColorVec4(ImGuiCol_Border));
+  } else {
+    ImGui::Text("no image selected");
+  }
 
   ImGui::End();
 }
