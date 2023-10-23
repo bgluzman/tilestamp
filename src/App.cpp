@@ -102,12 +102,16 @@ void App::Properties() {
       ImGui::TableNextRow();
 
       ImGui::TableSetColumnIndex(0);
+      ImGui::SetNextItemWidth(-FLT_MIN);
       ImGui::InputText(("##name" + std::to_string(row)).c_str(), &name);
       ImGui::TableSetColumnIndex(1);
+      ImGui::SetNextItemWidth(-FLT_MIN);
       ImGui::InputText(("##value" + std::to_string(row)).c_str(), &value);
       ImGui::TableSetColumnIndex(2);
-      if (ImGui::Button(("-##" + std::to_string(row)).c_str())) {
-        delete_row = true;
+      ImGui::SetNextItemWidth(-FLT_MIN);
+      delete_row = ImGui::Button(("-##" + std::to_string(row)).c_str());
+
+      if (delete_row) {
         break;
       }
     }
