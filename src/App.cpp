@@ -6,6 +6,7 @@
 #include <imgui_impl_sdl2.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <array>
 #include <iostream>
 #include <stdexcept>
 
@@ -186,7 +187,18 @@ void App::Output() {
 }
 
 void App::LoadImage(const std::filesystem::path &path) {
+#ifdef __WIN32
+  std::array<char, 1024> char_buf{'\0'};
+  std::size_t path_bytes =
+      std::wcstombs(char_buf.data(), path.c_str(), sizeof(char_buf));
+  if (path_bytes == static_cast<std::size_t>(-1)) {
+    throw std::runtime_error{"std::wcstombs"};
+  }
+  char_buf[std::min(path_bytes, sizeof(char_buf) - 1)] = '\0';
+  SDL_Texture *base_image = IMG_LoadTexture(renderer_, char_buf.data());
+#else
   SDL_Texture *base_image = IMG_LoadTexture(renderer_, path.c_str());
+#endif
   if (!base_image) {
     // TODO (bgluzman): obviously change this later...
     // throw std::runtime_error{"cannot load image"};
