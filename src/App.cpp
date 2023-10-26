@@ -55,10 +55,14 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   ImGui::SetNextWindowPos(viewport->WorkPos);
   ImGui::SetNextWindowSize(viewport->WorkSize);
 
+  ImVec2 winsize = ImGui::GetWindowSize();
+  static float w_scale = winsize.x / 1280.0f;
+  static float h_scale = winsize.y / 720.0f;
+
   // Lay out UI using approach from here:
   // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
-  static float w = 400.0f;
-  static float h = 500.0f;
+  static float w = 400.0f * w_scale;
+  static float h = 500.0f * h_scale;
   static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
                                   ImGuiWindowFlags_NoMove |
                                   ImGuiWindowFlags_NoSavedSettings;
