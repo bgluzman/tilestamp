@@ -4,7 +4,7 @@
 #include <SDL_image.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
-#include <misc/cpp/imgui_stdlib.h>
+#include <json.hpp>
 
 #include <array>
 #include <iostream>
@@ -12,7 +12,17 @@
 
 namespace ts {
 
-App::App(SDL_Renderer *renderer) : renderer_(renderer) {}
+using namespace nlohmann;
+
+App::App(SDL_Renderer *renderer) : renderer_(renderer) {
+  json ex1 = json::parse(R"(
+  {
+    "pi": 3.141,
+    "happy": true
+  }
+)");
+  std::cout << "this is pi: " << ex1["pi"] << '\n' << std::flush;
+}
 
 App::~App() noexcept {
   if (image_) {

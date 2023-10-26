@@ -5,22 +5,22 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(WIN32)
+if (WIN32)
     set(CMAKE_CXX_COMPILER g++)
     set(SDL_ARTIFACT_SUFFIX mingw)
 else ()
     set(CMAKE_CXX_COMPILER clang++)
     set(SDL_ARTIFACT_SUFFIX VC)
-endif()
+endif ()
 
 function(LOAD_SDL_LIB_CONFIG LIB_NAME)
-    if(WIN32)
+    if (WIN32)
         set(CMAKE_DIR "x86_64-w64-mingw32/lib/cmake/${LIB_NAME}")
         set(LIB_TARGET "${LIB_NAME}::${LIB_NAME}-static")
-    else()
+    else ()
         set(CMAKE_DIR "cmake")
         set(LIB_TARGET "${LIB_NAME}::${LIB_NAME}")
-    endif()
+    endif ()
     string(TOLOWER "${LIB_NAME}" LIB_NAME_LOWER)
     set(${LIB_NAME}_FIND_PACKAGE_DIR "${${LIB_NAME_LOWER}_SOURCE_DIR}/${CMAKE_DIR}" PARENT_SCOPE)
     set(${LIB_NAME}_LIB_TARGET "${LIB_TARGET}" PARENT_SCOPE)
@@ -55,7 +55,14 @@ FetchContent_Declare(
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ""
 )
-FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf imgui)
+FetchContent_Declare(
+        json
+        URL "https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp"
+        DOWNLOAD_NO_EXTRACT TRUE
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+)
+FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf imgui json)
 
 load_sdl_lib_config(SDL2)
 load_sdl_lib_config(SDL2_image)
@@ -102,6 +109,9 @@ add_library(
 target_include_directories(imgui PUBLIC "${imgui_SOURCE_DIR}" "${imgui_SOURCE_DIR}/backends")
 target_link_libraries(imgui PUBLIC "${SDL2_LIB_TARGET}")
 
+add_library(json INTERFACE)
+target_include_directories(json INTERFACE "${json_SOURCE_DIR}")
+
 add_executable(
         tilestamp
         src/main.cpp
@@ -114,7 +124,9 @@ target_link_libraries(
         "${SDL2_LIB_TARGET}"
         "${SDL2_image_LIB_TARGET}"
         "${SDL2_ttf_LIB_TARGET}"
-        imgui)
+        imgui
+        json
+)
 
 add_executable(demo src/demo.cpp)
 target_link_libraries(demo PRIVATE imgui)
