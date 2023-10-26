@@ -1,0 +1,29 @@
+{
+  "sheet": {
+    "name": "tiny-dungeon",
+    "sheet_dimensions": {
+      "width": 203,
+      "height": 186
+    },
+    "tile_dimensions": {
+      "width": 16,
+      "height": 16
+    },
+    "spacing": 1,
+    "offset": 0
+  },
+  "tiles": {
+    "outdoor_ground_plain": {
+      "coordinates": {
+        "x": 4,
+        "y": 0
+      }
+    },
+    "outdoor_ground_dirty": {
+      "coordinates": {
+        "x": 4,
+        "y": 1
+      }
+    }
+  }
+}
