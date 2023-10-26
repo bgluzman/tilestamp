@@ -20,9 +20,7 @@ public:
   bool operator()(ImGuiIO &io, SDL_Window &window);
 
 private:
-  void MenuBar();
   void Properties();
-  void Template();
   void Tilemap();
   void Output();
 

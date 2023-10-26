@@ -48,47 +48,55 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
     }
   }
 
-  MenuBar();
-  Tilemap();
+  // We demonstrate using the full viewport area or the work area (without
+  // menu-bars, task-bars etc.) Based on your use case you may want one or the
+  // other.
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+
+  // Lay out UI using approach from here:
+  // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
+  static float w = 400.0f;
+  static float h = 500.0f;
+  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
+                                  ImGuiWindowFlags_NoMove |
+                                  ImGuiWindowFlags_NoSavedSettings;
+
+  ImGui::Begin("Hello, world!", nullptr, flags);
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+
+  ImGui::BeginChild("child1", ImVec2(w, h), true);
   Properties();
-  Template();
+  ImGui::SameLine();
+
+  ImGui::EndChild();
+
+  ImGui::SameLine();
+  ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
+  if (ImGui::IsItemActive())
+    w += ImGui::GetIO().MouseDelta.x;
+  ImGui::SameLine();
+
+  ImGui::BeginChild("child2", ImVec2(0, h), true);
+  Tilemap();
+  ImGui::EndChild();
+
+  ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
+  if (ImGui::IsItemActive())
+    h += ImGui::GetIO().MouseDelta.y;
+
+  ImGui::BeginChild("child3", ImVec2(0, 0), true);
   Output();
+  ImGui::EndChild();
+
+  ImGui::PopStyleVar();
+  ImGui::End();
 
   return done;
 }
 
-void App::MenuBar() {
-  if (ImGui::BeginMainMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
-      ImGui::MenuItem("(demo menu)", nullptr, false, false);
-      if (ImGui::MenuItem("Checked", nullptr, true)) {
-      }
-      ImGui::Separator();
-      if (ImGui::MenuItem("Quit", "Alt+F4")) {
-      }
-      ImGui::EndMenu();
-    }
-    if (ImGui::BeginMenu("Edit")) {
-      if (ImGui::MenuItem("Undo", "CTRL+Z")) {
-      }
-      if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {
-      } // Disabled item
-      ImGui::Separator();
-      if (ImGui::MenuItem("Cut", "CTRL+X")) {
-      }
-      if (ImGui::MenuItem("Copy", "CTRL+C")) {
-      }
-      if (ImGui::MenuItem("Paste", "CTRL+V")) {
-      }
-      ImGui::EndMenu();
-    }
-    ImGui::EndMainMenuBar();
-  }
-}
-
 void App::Properties() {
-  ImGui::Begin("Property Editor");
-
   if (ImGui::BeginTable("properties", 3)) {
     ImGui::TableSetupColumn("Name");
     ImGui::TableSetupColumn("Value");
@@ -125,38 +133,9 @@ void App::Properties() {
   if (ImGui::Button("+")) {
     properties_.push_back({"name", "value"});
   }
-  ImGui::End();
-}
-
-void App::Template() {
-  ImGui::SetNextWindowSize(ImVec2(500, 440), ImGuiCond_FirstUseEver);
-  ImGui::Begin("Template Editor");
-
-  // Fields
-  ImGui::BeginChild("template-fields", ImVec2(150, 0), true);
-  static int selected = 0;
-  if (ImGui::Selectable("field1", selected == 1))
-    selected = 1;
-  if (ImGui::Selectable("field2", selected == 2))
-    selected = 2;
-  ImGui::EndChild();
-
-  ImGui::SameLine();
-
-  // Attributes
-  ImGui::BeginChild("template-attrs",
-                    ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
-  bool checked = false;
-  ImGui::Text("foo");
-  ImGui::Checkbox("bar", &checked);
-  ImGui::EndChild();
-
-  ImGui::End();
 }
 
 void App::Tilemap() {
-  ImGui::Begin("Tilemap", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-
   if (image_) {
     static float scale = 1.0;
     ImGui::DragFloat("zoom", &scale, 0.01f);
@@ -170,12 +149,9 @@ void App::Tilemap() {
   } else {
     ImGui::Text("no image selected");
   }
-
-  ImGui::End();
 }
 
 void App::Output() {
-  ImGui::Begin("Output");
   ImGui::TextWrapped(
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed volutpat "
       "eros diam, auctor tristique dui tempor et. Suspendisse potenti. Nam "
@@ -187,7 +163,6 @@ void App::Output() {
       "vehicula id hendrerit nibh. Suspendisse elementum sapien sed leo "
       "vulputate semper. Quisque interdum luctus mauris vel tempus. Sed "
       "imperdiet eros sit amet sem congue, non molestie neque euismod.");
-  ImGui::End();
 }
 
 void App::LoadImage(const std::filesystem::path &path) {
