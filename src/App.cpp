@@ -4,12 +4,16 @@
 #include <SDL_image.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
+#include <json.hpp>
 
 #include <array>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 
 namespace ts {
+
+using namespace nlohmann;
 
 App::App(SDL_Renderer *renderer) : renderer_(renderer) {}
 
@@ -41,9 +45,13 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
       done = true;
 
     if (event.type == SDL_DROPFILE) {
-      char *path = event.drop.file;
-      LoadImage(path);
-      SDL_free(path);
+      std::string path{event.drop.file};
+      if (path.ends_with(".json")) {
+        LoadOutput(path);
+      } else {
+        LoadImage(path);
+      }
+      SDL_free(event.drop.file);
     }
   }
 
@@ -136,18 +144,13 @@ void App::Tilemap() {
   }
 }
 
-void App::Output() {
-  ImGui::TextWrapped(
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed volutpat "
-      "eros diam, auctor tristique dui tempor et. Suspendisse potenti. Nam "
-      "porta at erat et consectetur. Cras in molestie enim. In sodales euismod "
-      "leo quis malesuada. Phasellus gravida eget nunc a imperdiet. Curabitur "
-      "convallis elementum ex, quis scelerisque neque tincidunt sit amet. Cras "
-      "ultricies libero sed tempor pulvinar. Proin at mauris dignissim velit "
-      "vestibulum efficitur at at enim. Duis ac dui eget lorem molestie "
-      "vehicula id hendrerit nibh. Suspendisse elementum sapien sed leo "
-      "vulputate semper. Quisque interdum luctus mauris vel tempus. Sed "
-      "imperdiet eros sit amet sem congue, non molestie neque euismod.");
+void App::Output() { ImGui::TextWrapped(metadata_.c_str()); }
+
+void App::LoadOutput(const std::filesystem::path &path) {
+  std::ifstream in(path);
+  std::stringstream buffer;
+  buffer << in.rdbuf();
+  metadata_ = buffer.str();
 }
 
 void App::LoadImage(const std::filesystem::path &path) {
