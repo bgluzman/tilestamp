@@ -30,7 +30,9 @@ private:
   SDL_Texture *image_ = nullptr;
 
   std::vector<std::pair<std::string, std::string>> properties_ = {
-      {"default", "default"}};
+      {"field1", "value1"},
+      {"field2", "value2"},
+  };
 
   int image_w_ = 0;
   int image_h_ = 0;

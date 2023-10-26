@@ -97,41 +97,23 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
 }
 
 void App::Properties() {
-  if (ImGui::BeginTable("properties", 3)) {
+  if (ImGui::BeginTable("properties", 2)) {
     ImGui::TableSetupColumn("Name");
     ImGui::TableSetupColumn("Value");
-    ImGui::TableSetupColumn("");
     ImGui::TableHeadersRow();
 
-    bool delete_row = false;
-    int row = 0;
-    for (; row != properties_.size(); ++row) {
-      auto &[name, value] = properties_[row];
+    for (const auto &[name, value] : properties_) {
       ImGui::TableNextRow();
 
       ImGui::TableSetColumnIndex(0);
       ImGui::SetNextItemWidth(-FLT_MIN);
-      ImGui::InputText(("##name" + std::to_string(row)).c_str(), &name);
+      ImGui::Text(name.c_str());
       ImGui::TableSetColumnIndex(1);
       ImGui::SetNextItemWidth(-FLT_MIN);
-      ImGui::InputText(("##value" + std::to_string(row)).c_str(), &value);
-      ImGui::TableSetColumnIndex(2);
-      ImGui::SetNextItemWidth(-FLT_MIN);
-      delete_row = ImGui::Button(("-##" + std::to_string(row)).c_str());
-
-      if (delete_row) {
-        break;
-      }
+      ImGui::Text(value.c_str());
     }
 
-    if (delete_row)
-      properties_.erase(properties_.begin() + row);
-
     ImGui::EndTable();
-  }
-
-  if (ImGui::Button("+")) {
-    properties_.push_back({"name", "value"});
   }
 }
 
