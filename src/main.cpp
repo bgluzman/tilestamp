@@ -48,8 +48,6 @@ int main(int, char **)
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
-  (void)io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
