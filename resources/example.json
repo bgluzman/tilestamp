@@ -1,6 +1,7 @@
 {
   "sheet": {
     "name": "tiny-dungeon",
+    "file": "tilemap_packed.png",
     "sheet_dimensions": {
       "width": 203,
       "height": 186
