@@ -4,26 +4,20 @@
 #include <SDL_image.h>
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
-#include <json.hpp>
 
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <json.hpp>
 #include <stdexcept>
 
 namespace ts {
 
 using namespace nlohmann;
 
-App::App(SDL_Renderer *renderer) : renderer_(renderer) {}
+App::App(SDL_Renderer *renderer) : tilesheet_display_(renderer) {}
 
-App::~App() noexcept {
-  if (image_) {
-    SDL_DestroyTexture(image_);
-  }
-}
-
-bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
+bool App::operator()(ImGuiIO& /*io*/, SDL_Window& window) {
   // Poll and handle events (inputs, window resize, etc.)
   // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
   // tell if dear imgui wants to use your inputs.
@@ -33,12 +27,11 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   // data to your main application, or clear/overwrite your copy of the
   // keyboard data. Generally you may always pass all inputs to dear imgui,
   // and hide them from your application based on those two flags.
-  bool done = false;
+  bool      done = false;
   SDL_Event event;
   while (SDL_PollEvent(&event)) {
     ImGui_ImplSDL2_ProcessEvent(&event);
-    if (event.type == SDL_QUIT)
-      done = true;
+    if (event.type == SDL_QUIT) done = true;
     if (event.type == SDL_WINDOWEVENT &&
         event.window.event == SDL_WINDOWEVENT_CLOSE &&
         event.window.windowID == SDL_GetWindowID(&window))
@@ -49,7 +42,7 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
       if (path.ends_with(".json")) {
         LoadOutput(path);
       } else {
-        LoadImage(path);
+        tilesheet_display_.LoadImage(path);
       }
       SDL_free(event.drop.file);
     }
@@ -62,14 +55,14 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
   ImGui::SetNextWindowPos(viewport->WorkPos);
   ImGui::SetNextWindowSize(viewport->WorkSize);
 
-  ImVec2 winsize = ImGui::GetWindowSize();
+  ImVec2       winsize = ImGui::GetWindowSize();
   static float w_scale = winsize.x / 1280.0f;
   static float h_scale = winsize.y / 720.0f;
 
   // Lay out UI using approach from here:
   // https://github.com/ocornut/imgui/issues/125#issuecomment-135775009
-  static float w = 400.0f * w_scale;
-  static float h = 500.0f * h_scale;
+  static float            w = 400.0f * w_scale;
+  static float            h = 500.0f * h_scale;
   static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration |
                                   ImGuiWindowFlags_NoMove |
                                   ImGuiWindowFlags_NoSavedSettings;
@@ -85,17 +78,15 @@ bool App::operator()(ImGuiIO & /*io*/, SDL_Window &window) {
 
   ImGui::SameLine();
   ImGui::InvisibleButton("vsplitter", ImVec2(8.0f, h));
-  if (ImGui::IsItemActive())
-    w += ImGui::GetIO().MouseDelta.x;
+  if (ImGui::IsItemActive()) w += ImGui::GetIO().MouseDelta.x;
   ImGui::SameLine();
 
   ImGui::BeginChild("child2", ImVec2(0, h), true);
-  Tilemap();
+  tilesheet_display_.Draw(1.0f);  // TODO (bgluzman): scaling
   ImGui::EndChild();
 
   ImGui::InvisibleButton("hsplitter", ImVec2(-1, 8.0f));
-  if (ImGui::IsItemActive())
-    h += ImGui::GetIO().MouseDelta.y;
+  if (ImGui::IsItemActive()) h += ImGui::GetIO().MouseDelta.y;
 
   ImGui::BeginChild("child3", ImVec2(0, 0), true);
   Output();
@@ -113,7 +104,7 @@ void App::Properties() {
     ImGui::TableSetupColumn("Value");
     ImGui::TableHeadersRow();
 
-    for (const auto &[name, value] : properties_) {
+    for (const auto& [name, value] : properties_) {
       ImGui::TableNextRow();
 
       ImGui::TableSetColumnIndex(0);
@@ -128,84 +119,13 @@ void App::Properties() {
   }
 }
 
-void App::Tilemap() {
-  if (image_) {
-    static float scale = 1.0;
-    ImGui::DragFloat("zoom", &scale, 0.01f);
-    ImVec2 uv_min = ImVec2(0.0f, 0.0f); // Top-left
-    ImVec2 uv_max = ImVec2(1.0f, 1.0f); // Lower-right
-    ImGui::Image(image_,
-                 ImVec2(static_cast<float>(image_w_) * scale,
-                        static_cast<float>(image_h_) * scale),
-                 uv_min, uv_max, ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-                 ImGui::GetStyleColorVec4(ImGuiCol_Border));
-  } else {
-    ImGui::Text("no image selected");
-  }
-}
-
 void App::Output() { ImGui::TextWrapped(metadata_.c_str()); }
 
-void App::LoadOutput(const std::filesystem::path &path) {
-  std::ifstream in(path);
+void App::LoadOutput(const std::filesystem::path& path) {
+  std::ifstream     in(path);
   std::stringstream buffer;
   buffer << in.rdbuf();
   metadata_ = buffer.str();
 }
 
-void App::LoadImage(const std::filesystem::path &path) {
-#ifdef __WIN32
-  std::array<char, 1024> char_buf{'\0'};
-  std::size_t path_bytes =
-      std::wcstombs(char_buf.data(), path.c_str(), sizeof(char_buf));
-  if (path_bytes == static_cast<std::size_t>(-1)) {
-    throw std::runtime_error{"std::wcstombs"};
-  }
-  char_buf[std::min(path_bytes, sizeof(char_buf) - 1)] = '\0';
-  SDL_Texture *base_image = IMG_LoadTexture(renderer_, char_buf.data());
-#else
-  SDL_Texture *base_image = IMG_LoadTexture(renderer_, path.c_str());
-#endif
-  if (!base_image) {
-    // TODO (bgluzman): obviously change this later...
-    // throw std::runtime_error{"cannot load image"};
-    return;
-  }
-
-  if (SDL_QueryTexture(base_image, nullptr, nullptr, &image_w_, &image_h_) <
-      0) {
-    throw std::runtime_error{"SDL_QueryTexture"};
-  }
-
-  image_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_ABGR8888,
-                             SDL_TEXTUREACCESS_TARGET, image_w_, image_h_);
-  if (!image_) {
-    throw std::runtime_error{"SDL_CreateTexture"};
-  }
-
-  SDL_Texture *prev_render_target = SDL_GetRenderTarget(renderer_);
-
-  if (SDL_SetRenderTarget(renderer_, image_) < 0) {
-    std::cerr << SDL_GetError() << std::endl;
-    throw std::runtime_error{"SDL_SetRenderTarget"};
-  }
-  SDL_Rect rect{.x = 0, .y = 0, .w = image_w_, .h = image_h_};
-  if (SDL_RenderCopy(renderer_, base_image, &rect, &rect) < 0) {
-    throw std::runtime_error{"SDL_RenderCopy"};
-  }
-
-  if (SDL_SetRenderDrawColor(renderer_, 0, 255, 0, SDL_ALPHA_OPAQUE) < 0) {
-    throw std::runtime_error{"SDL_SetRenderDrawColor"};
-  }
-  SDL_Rect selection{.x = 0, .y = 0, .w = 16, .h = 16};
-  if (SDL_RenderDrawRect(renderer_, &selection) < 0) {
-    throw std::runtime_error{"SDL_RenderDrawRect"};
-  }
-
-  if (SDL_SetRenderTarget(renderer_, prev_render_target) < 0) {
-    std::cerr << SDL_GetError() << std::endl;
-    throw std::runtime_error{"SDL_SetRenderTarget"};
-  }
-}
-
-} // namespace ts
+}  // namespace ts

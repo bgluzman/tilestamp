@@ -9,26 +9,28 @@
 #include <utility>
 #include <vector>
 
+#include "TilesheetDisplay.h"
+
 namespace ts {
 
 class App {
-public:
-  // TODO (bgluzman): copy/move ctor/assignment
-  App(SDL_Renderer *renderer);
-  ~App() noexcept;
+ public:
+  explicit App(SDL_Renderer *renderer);
+  ~App() noexcept = default;
+  App(const App&) = delete;
+  App& operator=(const App&) = delete;
+  App(App&&) noexcept = default;
+  App& operator=(App&&) noexcept = default;
 
-  bool operator()(ImGuiIO &io, SDL_Window &window);
+  bool operator()(ImGuiIO& io, SDL_Window& window);
 
-private:
+ private:
   void Properties();
-  void Tilemap();
   void Output();
 
-  void LoadOutput(const std::filesystem::path &path);
-  void LoadImage(const std::filesystem::path &path);
+  void LoadOutput(const std::filesystem::path& path);
 
-  SDL_Renderer *renderer_;
-  SDL_Texture *image_ = nullptr;
+  TilesheetDisplay tilesheet_display_;
 
   std::string metadata_ = "Drag-and-drop JSON file here to load.";
 
@@ -36,11 +38,8 @@ private:
       {"field1", "value1"},
       {"field2", "value2"},
   };
-
-  int image_w_ = 0;
-  int image_h_ = 0;
 };
 
-} // namespace ts
+}  // namespace ts
 
-#endif // TILESTAMP_APP_H
+#endif  // TILESTAMP_APP_H

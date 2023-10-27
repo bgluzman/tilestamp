@@ -117,6 +117,8 @@ add_executable(
         src/main.cpp
         src/App.cpp
         src/App.h
+        src/TilesheetDisplay.cpp
+        src/TilesheetDisplay.h
 )
 target_link_libraries(
         tilestamp
